@@ -60,10 +60,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           checktimer = true;
           timeToDisplay = "";
           started = true;
-          stopped = true  ;
-          Navigator.pushReplacement(context, MaterialPageRoute(
-            builder: (context) => MyApp(),
-          ));
+          stopped = true;
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MyApp(),
+              ));
         } else if (timeForTimer < 60) {
           timeToDisplay = timeForTimer.toString();
           timeForTimer = timeForTimer - 1;
@@ -91,6 +93,132 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       stopped = true;
       checktimer = false;
     });
+  }
+
+////////////////StopWatch/////////////
+
+bool startispressed = true ;
+bool stopispressed = true ;
+bool resetispressed = true ;
+String stoptimetodispay = "00:00:00";
+var swatch = Stopwatch();
+final dur = const Duration(seconds: 1);
+
+
+void keeprunning(){
+      if(swatch.isRunning){
+        starttimer();
+      }
+      setState(() { 
+        stoptimetodispay = swatch.elapsed.inHours.toString().padLeft(2,"0") + ":"
+                          +  (swatch.elapsed.inMinutes % 60 ).toString().padLeft(2,"0") + ":"
+                          + (swatch.elapsed.inSeconds% 60 ).toString().padLeft(2,"0") ;
+      });
+}
+void starttimer(){
+      Timer(dur, keeprunning);
+}
+void startstopwatch(){
+    setState(() {
+      stopispressed = false ;
+      startispressed = false ;
+    });
+    swatch.start();
+    starttimer();
+}
+
+void resetstopwatch(){
+      setState(() {
+        startispressed = true;
+        resetispressed = true ;
+
+      });
+      swatch.reset();
+      stoptimetodispay = "00:00:00";
+}
+
+void stopstopwatch(){
+  setState(() {
+    stopispressed = true ;
+    resetispressed = false ;
+  });
+  swatch.stop();
+
+}
+
+  Widget stopwatch() {
+    return Container(
+      child: Column(
+        children: [
+          Expanded(
+              flex: 6,
+              child: Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    stoptimetodispay,
+                    style:
+                        TextStyle(fontSize: 50.0, fontWeight: FontWeight.w700),
+                  ))),
+          Expanded(
+              flex: 4,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      RaisedButton(
+                        onPressed: stopispressed ? null : stopstopwatch,
+                        color: Colors.red,
+                        child: Text(
+                          "Stop",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.0,
+                              color: Colors.white),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 40.0, vertical: 15.0),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)),
+                      ),
+                      RaisedButton(
+                        onPressed: resetispressed ? null : resetstopwatch,
+                        color: Colors.teal,
+                        child: Text(
+                          "Reset",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.0,
+                              color: Colors.white),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 40.0, vertical: 15.0),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)),
+                      ),
+                    ],
+                  ),
+                   RaisedButton(
+                  onPressed: startispressed ? startstopwatch :null ,
+                  color: Colors.green,
+                  child: Text(
+                    "Start",
+                    style: TextStyle(
+                      fontSize: 24.0,
+                      color: Colors.white
+                    ),
+                  ),
+                    padding:
+                      EdgeInsets.symmetric(horizontal: 80.0, vertical: 20.0),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0)),
+                ),
+                ],
+              ))
+        ],
+      ),
+    );
   }
 
   Widget timer() {
@@ -141,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       initialValue: hour,
                       minValue: 0,
                       listViewWidth: 60.0,
-                      maxValue: 23,
+                      maxValue: 59,
                       onChanged: (val) {
                         setState(() {
                           min = val;
@@ -165,7 +293,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       initialValue: hour,
                       minValue: 0,
                       listViewWidth: 60.0,
-                      maxValue: 23,
+                      maxValue: 59,
                       onChanged: (val) {
                         setState(() {
                           sec = val;
@@ -240,7 +368,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             controller: tb,
           )),
       body: TabBarView(
-        children: <Widget>[timer(), Text("Stopwatch")],
+        children: <Widget>[timer(), stopwatch()],
         controller: tb,
       ),
     );
